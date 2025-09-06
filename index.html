@@ -3,82 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instamini - Instagram Clone</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Mini WhatsApp</title>
 <style>
-body { font-family: 'Roboto', sans-serif; background:#fafafa; margin:0; padding:0; }
-header { background:#fff; padding:10px; text-align:center; font-weight:700; font-size:24px; border-bottom:1px solid #ddd; position:sticky; top:0; z-index:10; }
-nav { display:flex; justify-content:space-around; background:#fff; border-bottom:1px solid #ddd; position:sticky; top:50px; z-index:10; }
-nav button { border:none; background:none; padding:10px; cursor:pointer; font-weight:500; }
-nav button.active { color:#f05454; border-bottom:2px solid #f05454; }
-section { display:none; padding:10px; max-width:600px; margin:auto; }
-section.active { display:block; }
-input,textarea { width:100%; padding:8px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; }
-button.primary { background:#f05454; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; font-weight:500; width:100%; }
-button.secondary { background:#262626; color:white; width:100%; border:none; border-radius:5px; padding:10px; margin-bottom:10px; cursor:pointer; }
-.post { background:#fff; padding:10px; border-radius:8px; margin-bottom:15px; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
-.post-header { display:flex; align-items:center; margin-bottom:10px; }
-.post-header img { width:40px; height:40px; border-radius:50%; margin-right:10px; object-fit:cover; }
-.post img.post-image { width:100%; max-height:400px; object-fit:cover; border-radius:8px; margin-bottom:10px; }
-.post-buttons button { background:none; border:none; color:#262626; margin-right:10px; cursor:pointer; font-weight:500; }
-.comment-section { margin-top:10px; padding-left:50px; }
-.comment { background:#f2f2f2; border-radius:5px; padding:5px; margin-bottom:5px; font-size:14px; }
-.comment input { width:70%; padding:5px; border-radius:5px; border:1px solid #ccc; }
-.comment button { padding:5px 8px; border:none; border-radius:5px; background:#f05454; color:white; cursor:pointer; }
-.feed-scroll, #myPostsContainer { max-height:70vh; overflow-y:auto; padding-right:5px; }
-.profile-pic-large { width:100px; height:100px; border-radius:50%; margin-bottom:10px; object-fit:cover; }
+/* ===== CSS ===== */
+body {margin:0;font-family:Arial,sans-serif;background:#ECE5DD;}
+.app-container {display:flex;flex-direction:column;height:100vh;}
+.contact-list {display:flex;overflow-x:auto;background:#075E54;padding:5px;}
+.contact-item {color:white;margin-right:10px;text-align:center;cursor:pointer;}
+.contact-item img {width:40px;border-radius:50%;display:block;margin:0 auto 2px;}
+.chat-header {background:#128C7E;color:white;padding:10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #075E54;}
+.chat-header img {width:40px;border-radius:50%;}
+.chat-messages {flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;}
+.message {padding:10px;margin:5px;max-width:70%;border-radius:15px;position:relative;word-wrap:break-word;}
+.message .time {font-size:0.7em;color:#555;position:absolute;bottom:3px;right:10px;}
+.sent {background:#DCF8C6;align-self:flex-end;border-bottom-right-radius:0;}
+.received {background:white;align-self:flex-start;border-bottom-left-radius:0;}
+.chat-input {display:flex;padding:5px;background:#f0f0f0;border-top:1px solid #ccc;}
+.chat-input input[type=text] {flex:1;padding:10px;border-radius:20px;border:1px solid #ccc;}
+.chat-input input[type=file] {margin-left:5px;}
+.chat-input button {padding:10px;background:#128C7E;color:white;border:none;margin-left:5px;border-radius:20px;cursor:pointer;}
 </style>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 
-<header>Instamini</header>
-
-<!-- Auth Section -->
-<section id="authSection" class="active">
-  <h2>Login / Sign Up</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button class="primary" onclick="signup()">Sign Up</button>
-  <button class="secondary" onclick="login()">Login</button>
-</section>
-
-<!-- Main Sections -->
-<nav id="mainNav" style="display:none;">
-  <button id="feedTab" class="active">Feed</button>
-  <button id="profileTab">Profile</button>
-  <button id="myPostsTab">My Posts</button>
-  <button onclick="logout()" style="margin-left:auto; color:#f05454; border:none; background:none; cursor:pointer;">Logout</button>
-</nav>
-
-<section id="feedSection">
-  <h2>Feed</h2>
-  <div class="feed-scroll" id="feedContainer"></div>
-  <h3>Create New Post</h3>
-  <textarea id="newPostContent" placeholder="What's on your mind?"></textarea>
-  <input type="file" id="newPostImage">
-  <button class="primary" onclick="createPost()">Post</button>
-</section>
-
-<section id="profileSection">
-  <h2>Profile</h2>
-  <img id="profilePic" class="profile-pic-large" src="">
-  <input type="file" id="profilePicUpload">
-  <input type="text" id="profileNameInput" placeholder="Username">
-  <button class="primary" onclick="updateProfile()">Update Profile</button>
-</section>
-
-<section id="myPostsSection">
-  <h2>My Posts</h2>
-  <div class="feed-scroll" id="myPostsContainer"></div>
-</section>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<div class="contact-list" id="contacts"></div>
+<div class="chat-header">
+  <div id="chat-name">Select a chat</div>
+  <img id="chat-pic" src="https://via.placeholder.com/40">
+</div>
+<div class="chat-messages" id="messages"></div>
+<div class="chat-input">
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <input type="file" id="fileInput">
+  <button id="sendBtn">Send</button>
+</div>
 
 <script>
-// Firebase Config (replace with yours)
+// ===== Firebase Config =====
 const firebaseConfig = {
   apiKey: "AIzaSyBxY0do9AYlt9NSHEA0jvUAHhKiOhnctt0",
   authDomain: "chatbot-bd1b4.firebaseapp.com",
@@ -89,224 +55,98 @@ const firebaseConfig = {
   measurementId: "G-Q217QD5HH9"
 };
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-// Default Avatar Generator
-function generateDefaultAvatar(username, size = 100) {
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
+// ===== User Setup =====
+let username = prompt("Enter your username:");
+let userPic = prompt("Enter profile picture URL (optional)","https://via.placeholder.com/40");
+if(!username) username="User";
 
-  // Instagram gradient
-  const gradient = ctx.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, "#f58529");
-  gradient.addColorStop(0.5, "#dd2a7b");
-  gradient.addColorStop(1, "#8134af");
+const contacts = [
+  {name:'Alice',pic:'https://via.placeholder.com/40?text=A'},
+  {name:'Bob',pic:'https://via.placeholder.com/40?text=B'},
+  {name:'Charlie',pic:'https://via.placeholder.com/40?text=C'}
+];
 
-  ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-  ctx.fill();
+let currentChat = null;
 
-  ctx.strokeStyle = "#fff";
-  ctx.lineWidth = size * 0.08;
-  ctx.stroke();
+// ===== Load Contacts =====
+const contactsDiv = document.getElementById('contacts');
+contacts.forEach(c=>{
+  const div=document.createElement('div');
+  div.classList.add('contact-item');
+  div.innerHTML=`<img src="${c.pic}"><div>${c.name}</div>`;
+  div.addEventListener('click',()=>openChat(c));
+  contactsDiv.appendChild(div);
+});
 
-  ctx.fillStyle = "#fff";
-  ctx.font = `${size / 2}px Roboto`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  const initials = username ? username.charAt(0).toUpperCase() : "U";
-  ctx.fillText(initials, size / 2, size / 2);
+// ===== Open Chat =====
+function openChat(contact){
+  currentChat=contact;
+  document.getElementById('chat-name').textContent=contact.name;
+  document.getElementById('chat-pic').src=contact.pic;
+  document.getElementById('messages').innerHTML='';
+  
+  if(window.currentChatRef) window.currentChatRef.off();
 
-  return canvas.toDataURL("image/png");
-}
-
-// Tabs
-const feedTab = document.getElementById('feedTab');
-const profileTab = document.getElementById('profileTab');
-const myPostsTab = document.getElementById('myPostsTab');
-const feedSection = document.getElementById('feedSection');
-const profileSection = document.getElementById('profileSection');
-const myPostsSection = document.getElementById('myPostsSection');
-feedTab.onclick = () => showSection('feed');
-profileTab.onclick = () => showSection('profile');
-myPostsTab.onclick = () => showSection('myPosts');
-
-function showSection(section){
-  feedSection.style.display='none'; profileSection.style.display='none'; myPostsSection.style.display='none';
-  feedTab.classList.remove('active'); profileTab.classList.remove('active'); myPostsTab.classList.remove('active');
-  if(section==='feed'){ feedSection.style.display='block'; feedTab.classList.add('active'); }
-  if(section==='profile'){ profileSection.style.display='block'; profileTab.classList.add('active'); }
-  if(section==='myPosts'){ myPostsSection.style.display='block'; myPostsTab.classList.add('active'); }
-}
-
-// Auth
-function signup(){
-  const email=document.getElementById('email').value;
-  const password=document.getElementById('password').value;
-  auth.createUserWithEmailAndPassword(email,password)
-  .then(()=>{ document.getElementById('authSection').style.display='none'; document.getElementById('mainNav').style.display='flex'; initUser(); })
-  .catch(e=>alert(e.message));
-}
-function login(){
-  const email=document.getElementById('email').value;
-  const password=document.getElementById('password').value;
-  auth.signInWithEmailAndPassword(email,password)
-  .then(()=>{ document.getElementById('authSection').style.display='none'; document.getElementById('mainNav').style.display='flex'; initUser(); })
-  .catch(e=>alert(e.message));
-}
-function logout(){ auth.signOut().then(()=>location.reload()); }
-
-// Init user
-function initUser(){
-  const user = auth.currentUser;
-  loadProfile(user.uid);
-  loadFeed();
-  loadMyPosts();
-}
-
-// Profile
-function loadProfile(uid){
-  db.ref('users/'+uid).once('value').then(snap=>{
-    const data = snap.val()||{};
-    const username = data.username || 'Anonymous';
-    document.getElementById('profileNameInput').value = username;
-    document.getElementById('profilePic').src = data.profilePic || generateDefaultAvatar(username, 100);
+  const chatId = getChatId(username, contact.name);
+  window.currentChatRef=db.ref('chats/'+chatId);
+  
+  window.currentChatRef.on('child_added', snapshot=>{
+    const msg=snapshot.val();
+    displayMessage(msg.sender,msg.text,msg.fileUrl,msg.timestamp);
   });
 }
-function updateProfile(){
-  const user=auth.currentUser;
-  const username=document.getElementById('profileNameInput').value || "Anonymous";
-  const file=document.getElementById('profilePicUpload').files[0];
+
+function getChatId(u1,u2){
+  return [u1,u2].sort().join('_');
+}
+
+// ===== Send Message =====
+const input=document.getElementById('messageInput');
+const sendBtn=document.getElementById('sendBtn');
+const fileInput=document.getElementById('fileInput');
+
+sendBtn.addEventListener('click',sendMessage);
+input.addEventListener('keypress',(e)=>{if(e.key==='Enter') sendMessage();});
+
+function sendMessage(){
+  if(!currentChat) return;
+  const text=input.value.trim();
+  const file=fileInput.files[0];
+  const chatId=getChatId(username,currentChat.name);
+
   if(file){
-    const ref=storage.ref('profilePics/'+user.uid+"_"+Date.now());
-    const uploadTask=ref.put(file);
-    uploadTask.on('state_changed',null,err=>alert(err.message),()=>{
-      uploadTask.snapshot.ref.getDownloadURL().then(url=>{
-        db.ref('users/'+user.uid).update({username,profilePic:url});
-        document.getElementById('profilePic').src=url;
-      });
-    });
-  } else {
-    db.ref('users/'+user.uid).update({username});
+    const storageRef=storage.ref('files/'+Date.now()+'_'+file.name);
+    storageRef.put(file).then(snap=>snap.ref.getDownloadURL().then(url=>{
+      db.ref('chats/'+chatId).push({sender:username,text:text,fileUrl:url,timestamp:Date.now()});
+    }));
+  }else if(text){
+    db.ref('chats/'+chatId).push({sender:username,text:text,timestamp:Date.now()});
   }
+  input.value='';
+  fileInput.value='';
 }
 
-// Feed
-function loadFeed(){
-  db.ref('posts').on('value', snapshot=>{
-    const feed=document.getElementById('feedContainer'); feed.innerHTML='';
-    snapshot.forEach(snap=>{
-      const post=snap.val(); const id=snap.key;
-      const avatar=post.profilePic || generateDefaultAvatar(post.username||"Anonymous",40);
-      feed.innerHTML+=`
-        <div class="post" id="post-${id}">
-          <div class="post-header"><img src="${avatar}"><strong>${post.username||'Anonymous'}</strong></div>
-          ${post.imageURL?`<img class="post-image" src="${post.imageURL}"/>`:''}
-          <div>${post.content}</div>
-          <div class="post-buttons">
-            <button onclick="likePost('${id}')">❤️ Like (${post.likes||0})</button>
-          </div>
-          <div class="comment-section">
-            <div id="comment-list-${id}"></div>
-            <input type="text" id="comment-input-${id}" placeholder="Add a comment">
-            <button onclick="addComment('${id}')">Post</button>
-          </div>
-        </div>`;
-      db.ref('posts/'+id+'/comments').on('value', snapComments=>{
-        const list=document.getElementById('comment-list-'+id); list.innerHTML='';
-        snapComments.forEach(c=>{
-          const cm=c.val();
-          list.innerHTML+=`<div class="comment"><strong>${cm.user}:</strong> ${cm.content}</div>`;
-        });
-      });
-    });
-  });
-}
-
-// My Posts
-function loadMyPosts(){
-  const user = auth.currentUser; if(!user) return;
-  db.ref('posts').orderByChild('authorID').equalTo(user.uid).on('value', snapshot=>{
-    const container=document.getElementById('myPostsContainer'); container.innerHTML='';
-    snapshot.forEach(snap=>{
-      const post=snap.val(); const id=snap.key;
-      const avatar=post.profilePic || generateDefaultAvatar(post.username||"Anonymous",40);
-      container.innerHTML+=`
-        <div class="post">
-          <div class="post-header"><img src="${avatar}"><strong>${post.username||'Anonymous'}</strong></div>
-          ${post.imageURL?`<img class="post-image" src="${post.imageURL}"/>`:''}
-          <div>${post.content}</div>
-          <div class="post-buttons">
-            <button onclick="editPost('${id}')">✏️ Edit</button>
-            <button onclick="deletePost('${id}')">🗑️ Delete</button>
-            <button onclick="likePost('${id}')">❤️ Like (${post.likes||0})</button>
-          </div>
-          <div class="comment-section">
-            <div id="comment-list-mypost-${id}"></div>
-            <input type="text" id="comment-input-mypost-${id}" placeholder="Add a comment">
-            <button onclick="addCommentMyPost('${id}')">Post</button>
-          </div>
-        </div>`;
-      db.ref('posts/'+id+'/comments').on('value', snapComments=>{
-        const list=document.getElementById('comment-list-mypost-'+id); list.innerHTML='';
-        snapComments.forEach(c=>{
-          const cm=c.val();
-          list.innerHTML+=`<div class="comment"><strong>${cm.user}:</strong> ${cm.content}</div>`;
-        });
-      });
-    });
-  });
-}
-
-// Create Post
-function createPost(){
-  const user=auth.currentUser; if(!user)return;
-  const content=document.getElementById('newPostContent').value.trim();
-  const file=document.getElementById('newPostImage').files[0];
-  const username=document.getElementById('profileNameInput').value||'Anonymous';
-  const profilePic=document.getElementById('profilePic').src;
-  if(!content && !file){ alert("Write something or upload an image!"); return; }
-  if(file){
-    const ref=storage.ref('postImages/'+user.uid+"_"+Date.now());
-    const uploadTask=ref.put(file);
-    uploadTask.on('state_changed',null,err=>alert(err.message),()=>{
-      uploadTask.snapshot.ref.getDownloadURL().then(url=>{
-        db.ref('posts').push({content,imageURL:url,authorID:user.uid,username,profilePic,likes:0});
-        document.getElementById('newPostContent').value=''; document.getElementById('newPostImage').value='';
-      });
-    });
+// ===== Display Messages =====
+function displayMessage(sender,text,fileUrl,timestamp){
+  const msgDiv=document.createElement('div');
+  msgDiv.classList.add('message');
+  msgDiv.classList.add(sender===username?'sent':'received');
+  
+  let timeStr = timestamp ? new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+  
+  if(fileUrl){
+    msgDiv.innerHTML=`${text}<br><a href="${fileUrl}" target="_blank">📎 View File</a><div class="time">${timeStr}</div>`;
   }else{
-    db.ref('posts').push({content,authorID:user.uid,username,profilePic,likes:0});
-    document.getElementById('newPostContent').value='';
+    msgDiv.innerHTML=`${text}<div class="time">${timeStr}</div>`;
   }
+  
+  document.getElementById('messages').appendChild(msgDiv);
+  document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight;
 }
-
-// Likes
-function likePost(id){ const ref=db.ref('posts/'+id+'/likes'); ref.transaction(current=>(current||0)+1); }
-
-// Comments
-function addComment(id){
-  const input=document.getElementById('comment-input-'+id); const text=input.value.trim(); if(!text)return;
-  const username=document.getElementById('profileNameInput').value||'Anonymous';
-  db.ref('posts/'+id+'/comments').push({user:username,content:text});
-  input.value='';
-}
-function addCommentMyPost(id){
-  const input=document.getElementById('comment-input-mypost-'+id); const text=input.value.trim(); if(!text)return;
-  const username=document.getElementById('profileNameInput').value||'Anonymous';
-  db.ref('posts/'+id+'/comments').push({user:username,content:text});
-  input.value='';
-}
-
-// Edit/Delete
-function editPost(id){ const newContent=prompt('Edit your post:'); if(newContent) db.ref('posts/'+id).update({content:newContent}); }
-function deletePost(id){ if(confirm('Delete this post?')) db.ref('posts/'+id).remove(); }
-
 </script>
+
 </body>
 </html>
